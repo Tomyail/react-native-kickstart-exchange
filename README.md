@@ -1,14 +1,18 @@
 # React Native Kickstart Exchange
 
-> **Development repository — not yet published to npm.**
+[![npm version](https://img.shields.io/npm/v/%40tomyail%2Freact-native-kickstart-exchange)](https://www.npmjs.com/package/@tomyail/react-native-kickstart-exchange)
+[![CI](https://github.com/Tomyail/react-native-kickstart-exchange/actions/workflows/ci.yml/badge.svg)](https://github.com/Tomyail/react-native-kickstart-exchange/actions/workflows/ci.yml)
+[![License](https://img.shields.io/github/license/Tomyail/react-native-kickstart-exchange)](LICENSE)
 
 A community-maintained, iOS 18+ React Native banner component for [Kickstart Exchange](https://github.com/twostraws/KickstartSDK). It is not an official Kickstart product.
 
 The package is designed for production use: hosts pass their own live API key, while the SDK's `preview` key is an explicit development-only option. No API key is embedded in the package.
 
+[**Install `@tomyail/react-native-kickstart-exchange` from npm →**](https://www.npmjs.com/package/@tomyail/react-native-kickstart-exchange)
+
 ## Installation target
 
-This is currently an **Expo Modules API** library. It works in Expo projects and can be used from a bare React Native project after adding Expo Modules support:
+This is an **Expo Modules API** library. It works in Expo projects and can be used from a bare React Native project after adding Expo Modules support:
 
 ```sh
 npx install-expo-modules@latest
@@ -17,9 +21,17 @@ npx install-expo-modules@latest
 The wrapper vendors the upstream MIT-licensed SDK source so that `pod install` is reproducible: consumers do **not** add a Swift Package manually.
 
 ```sh
-pnpm add @tomyail/react-native-kickstart-exchange
+npm install @tomyail/react-native-kickstart-exchange
 cd ios && pod install
 ```
+
+For a pnpm project:
+
+```sh
+pnpm add @tomyail/react-native-kickstart-exchange
+```
+
+Expo projects should run `npx expo prebuild` after installation. Set the iOS deployment target to 18.0 using `expo-build-properties` or your native Xcode project before building.
 
 Requirements:
 
@@ -74,7 +86,9 @@ pnpm check:upstream
 
 ## Status
 
-The package has completed a clean `pod install`, Simulator Debug build, and visual verification of the upstream preview banner in a consumer app. A standalone Expo example, package CI, git-cliff configuration, and tag-triggered npm publishing workflow are included. Before the first public release, review the host-facing privacy documentation and configure the repository's `NPM_TOKEN` secret.
+Version `0.1.0` is published on npm and has completed a clean `pod install`, Simulator Debug build, Release build, and visual verification of the upstream preview banner in a consumer app. A standalone Expo example, package CI, git-cliff changelog generation, and tag-triggered npm publishing workflow are included.
+
+See the [latest GitHub Release](https://github.com/Tomyail/react-native-kickstart-exchange/releases/latest) for release notes.
 
 ## License and upstream attribution
 
