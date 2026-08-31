@@ -1,0 +1,48 @@
+{
+  "name": "@tomyail/react-native-kickstart-exchange",
+  "version": "0.1.0",
+  "description": "iOS 18+ React Native banner component for Kickstart Exchange.",
+  "license": "MIT",
+  "author": "Tomyail",
+  "homepage": "https://github.com/Tomyail/react-native-kickstart-exchange",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Tomyail/react-native-kickstart-exchange.git"
+  },
+  "bugs": {
+    "url": "https://github.com/Tomyail/react-native-kickstart-exchange/issues"
+  },
+  "main": "src/index.ts",
+  "types": "src/index.ts",
+  "files": [
+    "src",
+    "ios",
+    "expo-module.config.json",
+    "UPSTREAM.json",
+    "docs",
+    "README.md",
+    "LICENSE"
+  ],
+  "sideEffects": false,
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "sync:upstream": "node scripts/sync-upstream.mjs",
+    "check:upstream": "node scripts/check-upstream.mjs",
+    "changelog": "git cliff --output CHANGELOG.md",
+    "changelog:release": "git cliff --current --tag",
+    "prepack": "npm run check:upstream"
+  },
+  "peerDependencies": {
+    "expo": ">=54",
+    "expo-modules-core": ">=2",
+    "react": ">=18",
+    "react-native": ">=0.76"
+  },
+  "devDependencies": {
+    "@types/react": "^19.0.0",
+    "@types/react-native": "^0.76.0",
+    "typescript": "^5.0.0"
+  }
+}

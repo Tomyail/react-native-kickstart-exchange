@@ -1,0 +1,54 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*.*.*"
+
+permissions:
+  contents: write
+  id-token: write
+
+jobs:
+  publish:
+    name: Publish npm package
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          registry-url: https://registry.npmjs.org
+      - name: Validate tag version
+        env:
+          TAG: ${{ github.ref_name }}
+        run: |
+          node <<'NODE'
+          const fs = require('node:fs');
+          const tag = process.env.TAG;
+          const version = JSON.parse(fs.readFileSync('package.json', 'utf8')).version;
+          if (tag !== `v${version}`) {
+            throw new Error(`Tag ${tag} does not match package.json version ${version}`);
+          }
+          NODE
+      - name: Check vendored upstream
+        run: npm run check:upstream
+      - name: Generate release notes with git-cliff
+        uses: orhun/git-cliff-action@v4
+        with:
+          config: cliff.toml
+          args: --current --tag ${{ github.ref_name }}
+        env:
+          OUTPUT: RELEASE_NOTES.md
+          GITHUB_REPO: ${{ github.repository }}
+      - name: Publish to npm
+        run: npm publish --provenance --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+      - name: Create GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ github.ref_name }}
+        run: gh release create "$TAG" --title "$TAG" --notes-file RELEASE_NOTES.md --verify-tag

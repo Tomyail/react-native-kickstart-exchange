@@ -1,0 +1,30 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  package:
+    name: Validate package
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Check vendored upstream
+        run: npm run check:upstream
+      - name: Check package contents
+        run: npm pack --dry-run
+      - name: Validate example configuration
+        working-directory: example
+        run: |
+          npm install --ignore-scripts
+          npx expo config --type public

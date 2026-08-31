@@ -1,0 +1,17 @@
+{
+  "name": "kickstart-exchange-example",
+  "private": true,
+  "version": "0.0.0",
+  "scripts": {
+    "start": "expo start",
+    "ios": "expo run:ios"
+  },
+  "dependencies": {
+    "@tomyail/react-native-kickstart-exchange": "file:..",
+    "expo": "~56.0.16",
+    "expo-build-properties": "~56.0.27",
+    "expo-status-bar": "~56.0.4",
+    "react": "19.2.3",
+    "react-native": "0.85.3"
+  }
+}
