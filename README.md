@@ -4,92 +4,144 @@
 [![CI](https://github.com/Tomyail/react-native-kickstart-exchange/actions/workflows/ci.yml/badge.svg)](https://github.com/Tomyail/react-native-kickstart-exchange/actions/workflows/ci.yml)
 [![License](https://img.shields.io/github/license/Tomyail/react-native-kickstart-exchange)](LICENSE)
 
-A community-maintained, iOS 18+ React Native banner component for [Kickstart Exchange](https://github.com/twostraws/KickstartSDK). It is not an official Kickstart product.
+A community-maintained React Native wrapper for [Kickstart Exchange](https://github.com/twostraws/KickstartSDK)'s SwiftUI banner on iOS 18+. This is not an official Kickstart product.
 
-The package is designed for production use: hosts pass their own live API key, while the SDK's `preview` key is an explicit development-only option. No API key is embedded in the package.
+## Requirements
 
-[**Install `@tomyail/react-native-kickstart-exchange` from npm →**](https://www.npmjs.com/package/@tomyail/react-native-kickstart-exchange)
+- iOS 18.0 or later
+- React Native 0.76 or later
+- Expo Modules API
+- A Kickstart Exchange API key for production builds
 
-## Installation target
+Android and other non-native platforms return `null` without rendering a banner.
 
-This is an **Expo Modules API** library. It works in Expo projects and can be used from a bare React Native project after adding Expo Modules support:
+## Installation
+
+### Expo projects
+
+```sh
+npm install @tomyail/react-native-kickstart-exchange
+npx expo install expo-build-properties
+```
+
+Set the iOS deployment target to 18.0 in `app.json` or `app.config.js`:
+
+```json
+{
+  "expo": {
+    "plugins": [
+      [
+        "expo-build-properties",
+        {
+          "ios": {
+            "deploymentTarget": "18.0"
+          }
+        }
+      ]
+    ]
+  }
+}
+```
+
+Then regenerate and build the native project:
+
+```sh
+npx expo prebuild
+npx expo run:ios
+```
+
+### Bare React Native projects
+
+If Expo Modules are not installed yet:
 
 ```sh
 npx install-expo-modules@latest
 ```
 
-The wrapper vendors the upstream MIT-licensed SDK source so that `pod install` is reproducible: consumers do **not** add a Swift Package manually.
+Install the package and CocoaPods dependency:
 
 ```sh
 npm install @tomyail/react-native-kickstart-exchange
 cd ios && pod install
 ```
 
-For a pnpm project:
+Set the deployment target of the iOS app and Pods to `18.0` or later before building.
 
-```sh
-pnpm add @tomyail/react-native-kickstart-exchange
-```
-
-Expo projects should run `npx expo prebuild` after installation. Set the iOS deployment target to 18.0 using `expo-build-properties` or your native Xcode project before building.
-
-Requirements:
-
-- iOS deployment target 18.0 or newer.
-- React Native 0.76+ and Expo Modules API.
-- A live Kickstart Exchange API key for shipping builds.
+The package includes the required upstream SDK source, so you do not need to add a Swift Package manually in Xcode.
 
 ## Usage
 
 ```tsx
 import { KickstartExchangeBanner } from "@tomyail/react-native-kickstart-exchange";
 
-<KickstartExchangeBanner
-  apiKey="ks_live_replace_with_your_key"
-  style={{ marginHorizontal: 16, marginTop: 24 }}
-/>;
+export function AdPlacement() {
+  const apiKey =
+    process.env.EXPO_PUBLIC_KICKSTART_EXCHANGE_KEY ??
+    (__DEV__ ? "preview" : "");
+
+  if (!apiKey) return null;
+
+  return (
+    <KickstartExchangeBanner
+      apiKey={apiKey}
+      style={{ marginHorizontal: 16, marginTop: 24 }}
+      testID="kickstart-exchange-banner"
+    />
+  );
+}
 ```
 
-`apiKey` is required; an empty key throws early rather than silently shipping an unusable placement.
+`apiKey` is required and must be non-empty. The default banner height is `164` points; pass a `style` to control its layout.
 
-For Debug builds and the iOS Simulator only, KickstartSDK accepts `apiKey="preview"` and loads its test advert. Never ship that key: the upstream SDK deliberately does not serve preview ads in production builds.
+### Preview mode
 
-Android and other non-native platforms render `null`.
+The upstream SDK accepts the literal `preview` key only in Debug builds and on the iOS Simulator. It loads a deterministic test advert without a Kickstart Exchange account.
 
-## Privacy and App Store responsibility
+Never use `preview` in a shipping build. Pass your live key through your app's build configuration instead.
 
-The bundled upstream `PrivacyInfo.xcprivacy` declares collection of Product Interaction and Advertising Data for advertising, analytics, app functionality, and developer advertising. The host application is responsible for accurately updating its App Store privacy answers, privacy policy, consent flow, and user-facing disclosures before using a live key.
+## Privacy and App Store disclosure
 
-See [docs/PRIVACY.md](docs/PRIVACY.md) and [docs/THIRD_PARTY_NOTICES.md](docs/THIRD_PARTY_NOTICES.md).
+The bundled SDK privacy manifest declares Product Interaction and Advertising Data for Third Party Advertising, Developer Advertising, Analytics, and App Functionality.
 
-## Upstream maintenance
+Before shipping with a live key, review the SDK's current data practices and update your app's:
 
-The sync script temporarily shallow-clones an approved immutable KickstartSDK tag, then writes the checked-in `ios/Vendor/KickstartSDK` snapshot. Neither this repository nor npm consumers use Git submodules.
+- App Store Connect App Privacy answers
+- Privacy Policy
+- Consent and regional disclosure flow, where applicable
+
+See [Privacy guidance](docs/PRIVACY.md) and [third-party notices](docs/THIRD_PARTY_NOTICES.md).
+
+## Example app
+
+A minimal Expo app is available in [`example/`](example/). Run it on an iOS 18+ Simulator with the `preview` key:
 
 ```sh
-pnpm sync:upstream -- --tag 0.5.0
-pnpm check:upstream
+cd example
+npm install
+npx expo prebuild --clean --platform ios
+npx expo run:ios
 ```
 
-`prepack` runs the same offline check and refuses to create a package when the vendored source differs from the tag, commit, or hash recorded in [`UPSTREAM.json`](UPSTREAM.json).
+## Troubleshooting
 
-## Repository layout
+### `no such module 'KickstartExchange'`
 
-| Path | Responsibility |
-| --- | --- |
-| `src/` | Public React Native API and platform behavior. |
-| `ios/` | Expo native view bridge plus vendored SDK source and resources. |
-| `scripts/` | Temporary-clone vendor sync and release-time parity check. |
-| `example/` | Consumer-app verification scenarios. |
-| `docs/` | Privacy, attribution, vendoring and release documents. |
-| `.github/workflows/` | Package validation and tag-triggered npm release automation. |
+Run `pod install` again, confirm that the app deployment target is iOS 18.0 or later, and build the `.xcworkspace` rather than the `.xcodeproj`.
 
-## Status
+### The banner is not visible
 
-Version `0.1.0` is published on npm and has completed a clean `pod install`, Simulator Debug build, Release build, and visual verification of the upstream preview banner in a consumer app. A standalone Expo example, package CI, git-cliff changelog generation, and tag-triggered npm publishing workflow are included.
+The SDK may be loading or may have no available advert. Confirm that the view has layout height, that the API key is valid, and that the app is active. The default wrapper height is 164 points.
 
-See the [latest GitHub Release](https://github.com/Tomyail/react-native-kickstart-exchange/releases/latest) for release notes.
+### Android renders nothing
 
-## License and upstream attribution
+This package currently supports iOS only. Android intentionally returns `null`.
 
-This project is MIT licensed. KickstartSDK is separately MIT licensed by Paul Hudson; its source is vendored solely to make CocoaPods installation reproducible. See [docs/THIRD_PARTY_NOTICES.md](docs/THIRD_PARTY_NOTICES.md).
+## Versioning
+
+Releases use [Conventional Commits](https://www.conventionalcommits.org/) and [git-cliff](https://git-cliff.org/). New versions are published to npm from matching Git tags such as `v0.1.0`.
+
+For contributing, upstream SDK synchronization, and release maintenance, see the documents in [`docs/`](docs/).
+
+## License
+
+This wrapper is MIT licensed. The bundled KickstartSDK source is separately MIT licensed by Paul Hudson. See [third-party notices](docs/THIRD_PARTY_NOTICES.md).
