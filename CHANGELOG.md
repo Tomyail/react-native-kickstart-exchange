@@ -5,6 +5,6 @@ All notable changes to this project are documented here.
 
 
 ### 🚀 Features
-- Add React Native Kickstart Exchange package (f495410)
+- Add React Native Kickstart Exchange package (62fda4b)
 
 
