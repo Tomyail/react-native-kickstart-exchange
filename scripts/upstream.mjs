@@ -11,6 +11,31 @@ export const vendorDir = join(root, "ios", "Vendor", "KickstartSDK");
 export const metadataPath = join(root, "UPSTREAM.json");
 export const copiedPaths = ["LICENSE", "Sources/KickstartExchange"];
 
+/** Reviewed local patches applied on top of the vendored upstream snapshot. */
+export const patchesDir = join(root, "ios", "vendor-patches");
+
+export function patchFiles(patches) {
+  return (patches ?? []).map((patch) => {
+    const relativePath = relative(root, join(root, patch));
+    if (
+      !relativePath.startsWith("ios/vendor-patches/") ||
+      relativePath.includes("..") ||
+      !relativePath.endsWith(".patch")
+    ) {
+      throw new Error(`Refusing patch outside ios/vendor-patches: ${patch}`);
+    }
+    return join(root, relativePath);
+  });
+}
+
+function gitApply(cwd, patchPaths, reverse) {
+  if (patchPaths.length === 0) return;
+  execFileSync("git", ["apply", ...(reverse ? ["--reverse"] : []), ...patchPaths], {
+    cwd,
+    encoding: "utf8",
+  });
+}
+
 function git(directory, args) {
   return execFileSync("git", args, { cwd: directory, encoding: "utf8" }).trim();
 }
@@ -48,6 +73,27 @@ export async function selectedTreeHash(directory) {
   return hasher.digest("hex");
 }
 
+/**
+ * Proves, fully offline, that the vendored tree equals the recorded pristine
+ * upstream snapshot plus the recorded patches: copy the vendor tree aside,
+ * reverse every patch, and hash the result.
+ */
+export async function verifyPatches(metadata) {
+  const patches = patchFiles(metadata.patches);
+  if (patches.length === 0) return null;
+
+  const tempRoot = await mkdtemp(join(tmpdir(), "kickstart-exchange-verify-"));
+  try {
+    const mirroredVendorLayout = join(tempRoot, "ios", "Vendor", "KickstartSDK");
+    await mkdir(dirname(mirroredVendorLayout), { recursive: true });
+    await cp(vendorDir, mirroredVendorLayout, { recursive: true });
+    gitApply(tempRoot, patches, true);
+    return await selectedTreeHash(mirroredVendorLayout);
+  } finally {
+    await rm(tempRoot, { recursive: true, force: true });
+  }
+}
+
 /** Runs an operation against a throwaway, immutable upstream tag checkout. */
 export async function withUpstreamTag(tag, operation) {
   if (!tag || tag.startsWith("-")) {
@@ -78,12 +124,28 @@ export async function syncVendor(tag) {
       await cp(join(checkout, copiedPath), join(vendorDir, copiedPath), { recursive: true });
     }
 
+    const upstreamSha256 = await selectedTreeHash(vendorDir);
+
+    // Local patches are part of the reviewed snapshot contract: they must
+    // re-apply cleanly on the fresh copy, or the sync stops for review.
+    gitApply(root, patchFiles(await currentPatchNames()));
+
     const metadata = {
       ...upstream,
       copiedPaths,
-      sourceSha256: await selectedTreeHash(checkout),
+      patches: await currentPatchNames(),
+      upstreamSha256,
+      sourceSha256: await selectedTreeHash(vendorDir),
     };
     await writeFile(metadataPath, `${JSON.stringify(metadata, null, 2)}\n`);
     return metadata;
   });
+}
+
+async function currentPatchNames() {
+  const entries = await readdir(patchesDir, { withFileTypes: true });
+  return entries
+    .filter((entry) => entry.isFile() && entry.name.endsWith(".patch"))
+    .map((entry) => `ios/vendor-patches/${entry.name}`)
+    .sort();
 }

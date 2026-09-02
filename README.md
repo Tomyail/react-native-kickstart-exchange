@@ -93,6 +93,38 @@ export function AdPlacement() {
 
 `apiKey` is required and must be non-empty. The default banner height is `164` points; pass a `style` to control its layout.
 
+### Theming and styling
+
+The banner accepts optional style props that restyle the card without touching
+ad loading, reporting, or accessibility:
+
+```tsx
+const { isDark, colors } = useAppTheme();
+
+<KickstartExchangeBanner
+  apiKey={apiKey}
+  colorScheme={isDark ? "dark" : "light"}
+  backgroundColor={colors.surface}
+  cornerStyle="rounded"
+  strokeColor={colors.border}
+  disclosureBackgroundColor={colors.tint}
+  actionTextColor={colors.tint}
+/>;
+```
+
+- `colorScheme` — force the banner's light/dark appearance when your app's
+  theme preference diverges from the system (dynamic colors, including the
+  default `.windowBackground` card, follow it).
+- `backgroundColor` — paint the card with your exact theme token.
+- `cornerStyle`, `strokeColor`, `disclosureBackgroundColor`, `actionTextColor`
+  — the upstream SDK's supported style seams.
+
+Colors are hex strings (`#RGB`, `#RGBA`, `#RRGGBB`, `#RRGGBBAA`); invalid
+values are ignored in favor of SDK defaults and never crash. Props apply on
+updates — theme changes at runtime restyle the banner without reloading the
+ad. See [Styling](docs/STYLING.md) for defaults, limitations, and how the
+background seam works.
+
 ### Preview mode
 
 The upstream SDK accepts the literal `preview` key only in Debug builds and on the iOS Simulator. It loads a deterministic test advert without a Kickstart Exchange account.

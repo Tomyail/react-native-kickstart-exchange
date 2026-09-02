@@ -6,5 +6,9 @@
     "LICENSE",
     "Sources/KickstartExchange"
   ],
-  "sourceSha256": "c7f3c75b53a92f2faa96664c34eb563d12b786a2fb726cae7f054f1c848b24a5"
+  "patches": [
+    "ios/vendor-patches/0001-ad-card-background-environment.patch"
+  ],
+  "upstreamSha256": "c7f3c75b53a92f2faa96664c34eb563d12b786a2fb726cae7f054f1c848b24a5",
+  "sourceSha256": "29d8d37c911dcaf46f1a1c8819a22da7b0df1ce8f5f80cd03e9b2cacb429255c"
 }

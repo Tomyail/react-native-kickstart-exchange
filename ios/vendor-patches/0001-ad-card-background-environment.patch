@@ -1,0 +1,21 @@
+diff --git a/ios/Vendor/KickstartSDK/Sources/KickstartExchange/Views/ExchangeAdvertisementCard.swift b/ios/Vendor/KickstartSDK/Sources/KickstartExchange/Views/ExchangeAdvertisementCard.swift
+index 5a32c23..b40b63e 100644
+--- a/ios/Vendor/KickstartSDK/Sources/KickstartExchange/Views/ExchangeAdvertisementCard.swift
++++ b/ios/Vendor/KickstartSDK/Sources/KickstartExchange/Views/ExchangeAdvertisementCard.swift
+@@ -17,6 +17,7 @@ struct ExchangeAdvertisementCard: View {
+     let showInformation: () -> Void
+ 
+     @Environment(\.exchangeAdCornerStyle) private var cornerStyle
++    @Environment(\.exchangeAdCardBackground) private var cardBackground
+     @Environment(\.exchangeAdStrokeColor) private var strokeColor
+     @Environment(\.exchangeAdDisclosureBackgroundColor) private var disclosureBackgroundColor
+     @Environment(\.colorScheme) private var colorScheme
+@@ -154,7 +155,7 @@ struct ExchangeAdvertisementCard: View {
+         #if os(visionOS)
+         .glassBackgroundEffect(in: .rect(cornerRadius: cornerStyle.cornerRadius))
+         #else
+-        .background(.windowBackground, in: .rect(cornerRadius: cornerStyle.cornerRadius))
++        .background(cardBackground, in: .rect(cornerRadius: cornerStyle.cornerRadius))
+         #endif
+         .overlay {
+             if let strokeColor {

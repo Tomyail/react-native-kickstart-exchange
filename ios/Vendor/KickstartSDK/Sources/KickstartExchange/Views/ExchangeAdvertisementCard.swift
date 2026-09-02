@@ -17,6 +17,7 @@ struct ExchangeAdvertisementCard: View {
     let showInformation: () -> Void
 
     @Environment(\.exchangeAdCornerStyle) private var cornerStyle
+    @Environment(\.exchangeAdCardBackground) private var cardBackground
     @Environment(\.exchangeAdStrokeColor) private var strokeColor
     @Environment(\.exchangeAdDisclosureBackgroundColor) private var disclosureBackgroundColor
     @Environment(\.colorScheme) private var colorScheme
@@ -154,7 +155,7 @@ struct ExchangeAdvertisementCard: View {
         #if os(visionOS)
         .glassBackgroundEffect(in: .rect(cornerRadius: cornerStyle.cornerRadius))
         #else
-        .background(.windowBackground, in: .rect(cornerRadius: cornerStyle.cornerRadius))
+        .background(cardBackground, in: .rect(cornerRadius: cornerStyle.cornerRadius))
         #endif
         .overlay {
             if let strokeColor {

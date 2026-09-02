@@ -1,5 +1,6 @@
 node_modules/
 lib/
+.build/
 *.log
 RELEASE_NOTES.md
 .DS_Store
@@ -7,3 +8,4 @@ ios/Pods/
 ios/build/
 example/node_modules/
 example/ios/Pods/
+example/package-lock.json

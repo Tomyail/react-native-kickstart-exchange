@@ -1,6 +1,6 @@
 {
   "name": "@tomyail/react-native-kickstart-exchange",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "iOS 18+ React Native banner component for Kickstart Exchange.",
   "license": "MIT",
   "author": "Tomyail",
@@ -28,6 +28,8 @@
     "access": "public"
   },
   "scripts": {
+    "test": "node --test --import ./test/register.mjs \"test/*.test.ts\"",
+    "test:swift": "mkdir -p .build && swiftc -parse-as-library -o .build/kickstart-color-tests ios/KickstartExchangeColorParsing.swift test/KickstartExchangeColorParsingTests.swift && ./.build/kickstart-color-tests",
     "sync:upstream": "node scripts/sync-upstream.mjs",
     "check:upstream": "node scripts/check-upstream.mjs",
     "changelog": "git cliff --output CHANGELOG.md",

@@ -13,7 +13,32 @@ Host JSX
                       └─ ExchangeBannerAdView (vendored KickstartSDK source)
 ```
 
-The public API accepts only an API key and normal React Native layout props. KickstartSDK owns ad presentation, accessibility, networking, reporting, Store navigation, and its in-app information/reporting views.
+The public API accepts an API key, React Native layout props, and the banner
+style props documented in [`docs/STYLING.md`](docs/STYLING.md). KickstartSDK
+owns ad presentation, accessibility, networking, reporting, Store navigation,
+and its in-app information/reporting views.
+
+The style props split across two mechanisms:
+
+- `colorScheme` maps to `UIHostingController.overrideUserInterfaceStyle`, so
+  hosts whose in-app theme diverges from the system appearance still get a
+  correctly-schemed card (including its `.windowBackground` surface).
+- `cornerStyle`, `strokeColor`, `disclosureBackgroundColor`, and
+  `actionTextColor` flow through the SDK's public style modifiers
+  (`exchangeAdCornerStyle`, `exchangeAdStroke`, …) from
+  `ios/KickstartExchangeAdStyle.swift`.
+- `backgroundColor` uses the package-owned `exchangeAdCardBackground`
+  environment key, which the vendored card reads through a hash-verified local
+  patch (`ios/vendor-patches/`, see [VENDORING.md](docs/VENDORING.md)). The
+  default keeps upstream `.windowBackground` pixel-for-pixel; an outer
+  SwiftUI modifier alone cannot override a background painted inside the
+  card, which is why this single seam exists.
+
+Hex color strings are parsed by Foundation-only
+`ios/KickstartExchangeColorParsing.swift` (unit-tested via plain `swiftc`);
+invalid values become `nil` and fall back to SDK defaults instead of
+crashing. Prop updates re-render the SwiftUI hierarchy in place, preserving
+the banner's ad-loading and reporting state.
 
 ## Why the SDK is vendored
 
@@ -26,6 +51,9 @@ Consequences:
 - Consumers run `pod install`; they do not edit Xcode's Package Dependencies.
 - `KickstartExchangeResourceBundle.swift` supplies the `Bundle.module` lookup that SwiftPM would normally synthesize.
 - The upstream privacy manifest is retained in a uniquely named CocoaPods resource bundle, avoiding a collision with the host app's `PrivacyInfo.xcprivacy`.
+- The vendored tree is `pristine upstream + reviewed local patches`
+  (`ios/vendor-patches/`), enforced offline by `check:upstream` via dual
+  SHA-256 hashes (`upstreamSha256` / `sourceSha256` in `UPSTREAM.json`).
 - Updating KickstartSDK is a deliberate vendoring update with a versioned notice and full consumer build verification.
 
 ## Platform support

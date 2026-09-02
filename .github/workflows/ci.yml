@@ -18,9 +18,13 @@ jobs:
           fetch-depth: 0
       - uses: actions/setup-node@v4
         with:
-          node-version: 22
+          node-version: 24
       - name: Check vendored upstream
         run: npm run check:upstream
+      - name: Run package tests
+        run: |
+          npm install --ignore-scripts --no-fund --no-audit
+          npm test
       - name: Check package contents
         run: npm pack --dry-run
       - name: Validate example configuration
