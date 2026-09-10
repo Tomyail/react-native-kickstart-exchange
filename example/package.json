@@ -11,7 +11,7 @@
     "expo": "~56.0.16",
     "expo-build-properties": "~56.0.27",
     "expo-status-bar": "~56.0.4",
-    "react": "19.2.8",
+    "react": "19.3.0",
     "react-native": "0.87.1"
   }
 }
